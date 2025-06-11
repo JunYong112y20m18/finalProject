@@ -11,10 +11,7 @@ const nextConfig = {
             },
             {
                 hostname: "avatars.githubusercontent.com",
-            },
-            {
-                hostname: process.env.NEXT_SUPABASE_IMAGE_REMOTE_PATTERN,
-            },
+            }
         ],
     },
 };
