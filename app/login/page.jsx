@@ -4,6 +4,7 @@ import { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { signIn } from "next-auth/react";
+import {loginAction} from "@/app/actions/login"
 
 export default function LoginPage() {
     const [formData, setFormData] = useState({
@@ -65,7 +66,7 @@ export default function LoginPage() {
                     </div>
                 )}
                 <div className="mt-6 text-center">
-                    <form action="" className="space-y-3">
+                    <form action={loginAction} className="space-y-3">
                         <button
                             type="submit"
                             name="provider"

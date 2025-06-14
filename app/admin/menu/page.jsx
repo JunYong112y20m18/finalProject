@@ -31,7 +31,7 @@ export default function MenuManagementPage() {
         getMenu();
     }, []);
 
-    const handleCreate = async (e) => {
+    const addMenuItem = async (e) => {
         e.preventDefault();
         try {
             const itemToSend = {
@@ -105,17 +105,22 @@ export default function MenuManagementPage() {
 
     const handleEdit = async (menuId) => {
         try {
-            const updatedItemToSend = {
-                ...editItem,
-                price: parseFloat(editItem.price),
-            };
+            const formData = new FormData();
+            formData.append("name", editItem.name);
+            formData.append("description", editItem.description);
+            formData.append("price", editItem.price);
+            formData.append("isAvailable", editItem.isAvailable);
+            
+            // 如果有新的圖片檔案，則上傳
+            if (imageFile) {
+                formData.append("image", imageFile);
+            } else if (editItem.imageUrl) {
+                formData.append("imageUrl", editItem.imageUrl);
+            }
 
             const response = await fetch(`/api/menu/${menuId}`, {
                 method: "PUT",
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(updatedItemToSend),
+                body: formData,
             });
 
             if (!response.ok) {
@@ -128,6 +133,7 @@ export default function MenuManagementPage() {
                 prev.map((item) => (item.id === menuId ? updatedItem : item))
             );
             setEditingId(null);
+            setImageFile(null);
         } catch (error) {
             console.error("更新失敗:", error.message);
         }
@@ -136,6 +142,28 @@ export default function MenuManagementPage() {
     const cancelEdit = () => {
         setEditingId(null);
         setEditItem({});
+    };
+
+    const handleDelete = async (menuId) => {
+        if (!confirm("確定要刪除此餐點嗎？")) {
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/menu/${menuId}`, {
+                method: "DELETE",
+            });
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                throw new Error(errorText);
+            }
+
+            setMenuItems((prev) => prev.filter((item) => item.id !== menuId));
+        } catch (error) {
+            console.error("刪除失敗:", error.message);
+            alert("刪除失敗：" + error.message);
+        }
     };
 
     return (
@@ -161,7 +189,7 @@ export default function MenuManagementPage() {
                     <div className="bg-white p-6 rounded-lg shadow-lg mb-10">
                         <h2 className="text-xl font-semibold mb-4">新增餐點</h2>
                         <form
-                            onSubmit={handleCreate}
+                            onSubmit={addMenuItem}
                             className="grid grid-cols-1 md:grid-cols-2 gap-6"
                         >
                             <div>
@@ -355,20 +383,44 @@ export default function MenuManagementPage() {
                                         placeholder="描述"
                                     />
                                     <label className="block mb-1 ms-2 font-medium text-gray-700">
-                                        圖片URL
+                                        圖片
                                     </label>
-                                    <input
-                                        type="text"
-                                        value={editItem.imageUrl}
-                                        onChange={(e) =>
-                                            setEditItem({
-                                                ...editItem,
-                                                imageUrl: e.target.value,
-                                            })
-                                        }
-                                        className="w-full border rounded-md px-3 py-2 focus:ring-2 focus:ring-pink-400"
-                                        placeholder="圖片 URL"
-                                    />
+                                    <div className="flex flex-col gap-2">
+                                        <input
+                                            type="file"
+                                            accept="image/*"
+                                            onChange={(e) => setImageFile(e.target.files[0])}
+                                            className="w-full text-sm text-gray-700 file:mr-4 file:py-2 file:px-4
+                                                       file:rounded-full file:border-0
+                                                       file:text-sm file:font-semibold
+                                                       file:bg-blue-50 file:text-blue-700
+                                                       hover:file:bg-blue-100"
+                                        />
+                                        {editItem.imageUrl && !imageFile && (
+                                            <div className="mt-2">
+                                                <p className="text-sm text-gray-600">目前圖片：</p>
+                                                <Image
+                                                    src={editItem.imageUrl}
+                                                    width={200}
+                                                    height={150}
+                                                    alt="目前圖片"
+                                                    className="mt-2 rounded-lg"
+                                                />
+                                            </div>
+                                        )}
+                                        {imageFile && (
+                                            <div className="mt-2">
+                                                <p className="text-sm text-gray-600">新圖片預覽：</p>
+                                                <Image
+                                                    src={URL.createObjectURL(imageFile)}
+                                                    width={200}
+                                                    height={150}
+                                                    alt="新圖片預覽"
+                                                    className="mt-2 rounded-lg"
+                                                />
+                                            </div>
+                                        )}
+                                    </div>
                                     <label className="inline-flex items-center space-x-2">
                                         <input
                                             type="checkbox"
@@ -444,6 +496,12 @@ export default function MenuManagementPage() {
                                     className="absolute top-3 right-3 px-3 py-1.5 bg-gradient-to-r from-pink-500 to-red-600 text-white text-sm rounded-lg shadow-md hover:from-pink-600 hover:to-red-700 hover:shadow-lg transition duration-300 ease-in-out"
                                 >
                                     編輯
+                                </button>
+                                <button
+                                    onClick={() => handleDelete(item.id)}
+                                    className="absolute top-3 right-24 px-3 py-1.5 bg-red-600 text-white text-sm rounded-lg shadow-md hover:bg-red-700 hover:shadow-lg transition duration-300 ease-in-out"
+                                >
+                                    刪除
                                 </button>
                             </div>
                         )

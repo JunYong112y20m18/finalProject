@@ -31,7 +31,7 @@ export default function Navbar() {
 
     const getRoleLinks = () => {
         if (!user?.role) return [];
-
+        console.log(user.role)
         switch (user.role) {
             case "CUSTOMER":
                 return [

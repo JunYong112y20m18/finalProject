@@ -5,7 +5,7 @@ import { useEffect, useState, useRef } from "react";
 import mqtt from "mqtt";
 
 export function useMqttClient({
-    brokerUrl = "wss://broker.emqx.io:8084/mqtt",
+    brokerUrl = process.env.NEXT_PUBLIC_MQTT_BROKER_URL || "wss://broker.emqx.io:8084/mqtt",
     subscribeTopics = [],
     publishTopic = "",
     mqttOptions = {},
@@ -78,7 +78,6 @@ export function useMqttClient({
                 if (err) {
                     console.error(`發佈消息到 ${topic} 失敗:`, err);
                 } else {
-                    // console.log(`已發佈消息到 ${topic}: ${msg}`);
                     console.log(`已發佈消息到 ${topic}`);
                 }
             });
