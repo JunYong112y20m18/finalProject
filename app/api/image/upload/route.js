@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
-import { supabase } from "@/lib/supabase";
+import { getSupabase } from "@/lib/supabase";
 
 // 生成檔名的函數
 function generateFilename(originalFilename) {
     const timestamp = Date.now();
     return `${timestamp}-${originalFilename}`;
 }
+
+const supabase = getSupabase();
 
 export async function POST(request) {
     try {
