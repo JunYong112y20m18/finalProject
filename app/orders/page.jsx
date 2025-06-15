@@ -18,7 +18,7 @@ export default function OrdersPage() {
         if (loading) {
             return;
         }
-        setTopic(getKitchenReadyOrderTopic("#"));
+        //setTopic(getKitchenReadyOrderTopic("#"));
 
         const getOrders = async () => {
             try {

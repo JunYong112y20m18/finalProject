@@ -14,7 +14,7 @@ export default function CheckoutPage() {
     const [user, setUser] = useState({});
     const [topic, setTopic] = useState("");
 
-    const { publishMessage } = useMqttClient({});
+    //const { publishMessage } = useMqttClient({});
 
     useEffect(() => {
         const sessionUser = sessionStorage.getItem("user");
@@ -24,7 +24,7 @@ export default function CheckoutPage() {
     }, []);
 
     useEffect(() => {
-        setTopic(getOrderCheckoutTopic());
+        //setTopic(getOrderCheckoutTopic());
 
         const savedCart = sessionStorage.getItem("cart");
         if (savedCart) {
