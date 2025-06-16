@@ -51,7 +51,7 @@ import GitHub from "next-auth/providers/github";
 import Google from "next-auth/providers/google";
 import prisma from "@/lib/prisma";
 
-const params = {
+const googleParams = {
     prompt: "consent",
     access_type: "offline",
     response_type: "code",
@@ -63,12 +63,19 @@ const authOptions = {
         GitHub({
             clientId: process.env.GITHUB_CLIENT_ID,
             clientSecret: process.env.GITHUB_CLIENT_SECRET,
-            authorization: { params },
+            authorization: {
+                params: {
+                    prompt: "consent",
+                    access_type: "offline",
+                    response_type: "code",
+                    scope: "read:user user:email",
+                },
+            },
         }),
         Google({
             clientId: process.env.GOOGLE_CLIENT_ID,
             clientSecret: process.env.GOOGLE_CLIENT_SECRET,
-            authorization: { params },
+            authorization: { googleParams },
         }),
     ],
     callbacks: {
@@ -78,7 +85,7 @@ const authOptions = {
                     return false;
                 }
 
-                const ownerEmail = "john1234567891331@gmail.com";
+                const ownerEmail = " ";
 
                 const existingUser = await prisma.user.findUnique({
                     where: { email: user.email }
@@ -90,9 +97,14 @@ const authOptions = {
 
                 const role = user.email === ownerEmail ? "OWNER" : "CUSTOMER";
 
-                await prisma.user.update({
+                await prisma.user.upsert({
                     where: { email: user.email },
-                    data: { role },
+                    update: { role },
+                    create: {
+                        email: user.email,
+                        name: user.name,
+                        role,
+                    },
                 });
 
                 return true;
