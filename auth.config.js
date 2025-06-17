@@ -97,7 +97,7 @@ const authOptions = {
 
                 const role = user.email === ownerEmail ? "OWNER" : "CUSTOMER";
 
-                await prisma.user.upsert({
+                const upsertedUser = await prisma.user.upsert({
                     where: { email: user.email },
                     update: { role },
                     create: {
@@ -107,10 +107,44 @@ const authOptions = {
                     },
                 });
 
+                if (account) {
+                    await prisma.account.upsert({
+                        where: {
+                        provider_providerAccountId: {
+                            provider: account.provider,
+                            providerAccountId: account.providerAccountId
+                        }
+                        },
+                        update: {
+                        access_token: account.access_token,
+                        refresh_token: account.refresh_token,
+                        token_type: account.token_type,
+                        scope: account.scope,
+                        expires_at: account.expires_at,
+                        id_token: account.id_token,
+                        session_state: account.session_state
+                        },
+                        create: {
+                        userId: upsertedUser.id,  // 正確！用資料庫的 User.id
+                        type: account.type,
+                        provider: account.provider,
+                        providerAccountId: account.providerAccountId,
+                        access_token: account.access_token,
+                        refresh_token: account.refresh_token,
+                        token_type: account.token_type,
+                        scope: account.scope,
+                        expires_at: account.expires_at,
+                        id_token: account.id_token,
+                        session_state: account.session_state
+                        }
+                    });
+
+}
+
                 return true;
             } catch (error) {
                 console.error("Sign in error:", error);
-                return true; // 允許登入，即使發生錯誤
+                return false; // 允許登入，即使發生錯誤
             }
         },
 
